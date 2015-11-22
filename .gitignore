@@ -1,0 +1,16 @@
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.lof
+*.lot
+*.nlo
+*.toc
+*~
+*.swp
+*.bak
+relsize.sty
+nomencl.sty
+upload.sh
+
