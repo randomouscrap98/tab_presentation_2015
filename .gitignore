@@ -7,10 +7,12 @@
 *.lot
 *.nlo
 *.toc
+*.nav
+*.snm
 *~
 *.swp
 *.bak
 relsize.sty
 nomencl.sty
 upload.sh
-
+presentation.pdf
