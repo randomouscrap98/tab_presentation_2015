@@ -6,13 +6,14 @@
 \definecolor{darkdarkgarnet}{RGB}{57,23,27}
 \definecolor{darkdarkdarkgarnet}{RGB}{40,15,18}
 \definecolor{gold}{RGB}{212,175,55}
-\definecolor{darkgold}{RGB}{150,115,35}
+\definecolor{darkgold}{RGB}{150,115,45}
 \setbeamercolor{palette primary}{bg=garnet}
 \setbeamercolor{palette secondary}{bg=darkgarnet} 
 \setbeamercolor{palette tertiary}{bg=darkdarkgarnet}
 \setbeamercolor{palette quaternary}{bg=darkdarkdarkgarnet}
 \setbeamercolor{background canvas}{bg=white}
 \setbeamercolor*{item}{fg=darkgold}
+\setbeamercolor{block title}{bg=darkgold}
 
 
 \title[TAB v2] % (optional, only for long titles)
@@ -28,23 +29,21 @@
 \frame{\titlepage} 
 \section{Initial pokings}
 \subsection{How to do things?}
-\begin{frame} 
-   \frametitle{This is the first slide}
+\begin{frame}{This is the first slide}
    Some content and whatever.
    How do you do bullets?
    How do you do images?
 \end{frame}
 \subsection{Some revelations}
-\begin{frame}
-   \frametitle{This is the second slide}
+\begin{frame}{This is the second slide}
    \framesubtitle{Doing some other cool stuff}
    You can only have one subtitle (so IDK when to use it)
    boring content
    extra boring content
 \end{frame}
 \section{First tests}
-\begin{frame}
-   \frametitle{Some lists}
+\subsection{Lists}
+\begin{frame}{Some lists}
    \begin{itemize}
       \item This is a bullet list (begin\{itemize\})
       \item It works just like any other bullet list in latex
@@ -63,5 +62,33 @@
       \item[Second] The second item
       \item[Third] The third etc \ldots
    \end{description}
+\end{frame}
+\subsection{Images}
+\begin{frame}{How it works}
+   \includegraphics[width=\textwidth]{figures/tabhardware.pdf}
+\end{frame}
+\begin{frame}{How it works with explanation}
+   \begin{columns} %[c] for centered, [T] for top
+      \column{.5\textwidth}
+      This is how it works: yeah
+      \begin{block}{This is a block}
+      A detailed explanation with a fancy header
+      \end{block}
+      \column{.5\textwidth}
+      \includegraphics[width=\textwidth]{figures/tabhardware.pdf}
+   \end{columns}
+\end{frame}
+\begin{frame}{How it works with explanation 2}
+   \begin{columns} %[c] for centered, [T] for top
+      \column{.5\textwidth}
+         This is how it works: yeah
+      \begin{block}{This is a block}
+         A detailed explanation with a fancy header
+      \end{block}
+      \column{.5\textwidth}
+      \begin{block}{An image in a block}
+         \includegraphics[width=\textwidth]{figures/tabhardware.pdf}
+      \end{block}
+   \end{columns}
 \end{frame}
 \end{document}
