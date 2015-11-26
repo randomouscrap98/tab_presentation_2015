@@ -1,0 +1,20 @@
+-What is the tagless access buffer?
+ *QUICK description!
+-What problem does it solve?
+ *Not too many details
+ *Saves energy whatever
+-A bit more information on how the TAB works
+ *Once you have enough information, talk about the changes to TAB
+ *We may need to talk about the "updated" part much later so people understand
+  the changes!
+-TAB hardware
+ *Use images
+-TAB Operations
+-Compiler garbage
+-Extra functionality
+ *Avoiding unnecessary data transfers
+-How well does it work? 
+ *Results
+-Conclusion
+ *TAB does stuff blah blah blah
+
