@@ -1,12 +1,46 @@
 -What is the tagless access buffer?
+ *A small buffer placed at the top of the memory hierarchy
+ *Holds a few lines from the L1D (inclusive)
+ *Data explicitly directed from the L1D to the TAB by compiler generated instructions
+ *Compiler looks in loops for references with constant strides or invariant
+  addresses to direct to the TAB
  *QUICK description!
 -What problem does it solve?
+ *Energy efficiency is a major design constraint in processors
+ *Cache accounts for up to 25% of a processor's total power draw
+  (only if references can easily be added?)
+ *TAB reduces overall cache energy usage
+  +TAB uses less energy than the L1D because it is:
+   #Smaller
+   #Requires Far fewer DTLB accesses
+   #Requires no tag check
  *Not too many details
- *Saves energy whatever
--A bit more information on how the TAB works
- *Once you have enough information, talk about the changes to TAB
- *We may need to talk about the "updated" part much later so people understand
-  the changes!
+-Why use references with constant stride or invariant address
+ *We can calculate the following reference's address if the loop reference has
+  a constant stride throughout the loop or if the address doesn't change.
+ *Before the line is needed, we can prefetch the next line so it is available
+  before it is accessed again.
+ *No need to check tags since we can guarantee with prefetching that the TAB 
+  entry has the line we need 
+-TAB instructions
+ *Two instructions control the TAB
+  +gtab links a register to a TAB entry
+   #once active, references with that base register will be directed to the TAB
+   #gtab prefetches the line needed by the first TAB reference
+   #Further prefetches are performed automatically when needed and keep the
+    line data valid for the TAB references.
+  +rtab removes the register link and deallocates the TAB
+ *Both instructions use the same opcode; distinguished by a bit
+  +Maybe image here?
+X*Once you have enough information, talk about the changes to TAB
+X*We may need to talk about the "updated" part much later so people understand
+X the changes!
+-Example TAB instruction generation (use figure 2.3)
+ *Show original loop, "Simple summation"
+ *Show RTLs without TAB instructions:
+ *Show RTLs with TAB instructions: 
+ *SHOULD show the prefetch image SOMEWHERE at least, but maybe wait until the
+  prefetch section
 -TAB hardware
  *Use images
 -TAB Operations
