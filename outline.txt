@@ -55,7 +55,7 @@ X the changes!
  *If any match AND the matching TAB is valid (AND bits from comparison and valid
  windows), direct that reference to the associated TAB
  *If none match, go to L1D
--TAB metadata (description and image)
+-General metadata (description and right side image)
  *show the metadata and buffer section of the image
  *Separate metadata for TAB entry and TAB line
   +Not necessarily a one to one relationship between TAB entries and TAB lines
@@ -68,7 +68,8 @@ X the changes!
   +access type helps save energy by stopping certain unnecessary line transfers
   +prefetch type and prefetch PC give information about how and when to
   prefetch
-  +index and extra line 
+  +index and extra line indicate the TAB line associated with the TAB and
+   how many lines the TAB is using (one or two)
 -Line metadata (show actual line metadata structure)
  *Line metadata stores information which allows quick L1D access for writebacks
   and interferences
@@ -76,6 +77,26 @@ X the changes!
   of the line
   +Physical page number removes the need to check the DTLB
   +includes a write mask so only dirty bytes are written back to l1d
+-ISA modifications
+ *Only requires one extra opcode: gtab and rtab instructions are differentiated
+  by a separate one bit field
+ *Many fields in gtab get stored in metadata
+  +base register stored in register array
+  +stride is left shifted by the value in shift size to give the actual stride
+  +L/S is the prefetch type
+  +Prefetch offset is multiplied by the instruction byte width and added to the
+  current PC to produce the prefetch PC metadata field
+ *rtab release field is a bitfield indicating which TAB entries to deallocate
+-Required L1D changes
+ *Each line in L1D extended with 2 bits: a T and I bit
+ *T bit indicates if line resides in a TAB. When L1D evictions occur, this is
+ used to invalidate the TAB line
+ *I bit indicates if references to this line should go to the TAB for the most
+ recent data, called an "interference"
+ *Interferences require an extra cycle to get the data from the TAB
+ *The I bit saves energy and execution time; 
+  +Many lines that reside in the TAB are guaranteed not to cause interferences, 
+   so it is a waste to go to the TAB
 -TAB Operations
 -Compiler garbage
 -Extra functionality
