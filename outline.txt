@@ -41,8 +41,41 @@ X the changes!
  *Show RTLs with TAB instructions: 
  *SHOULD show the prefetch image SOMEWHERE at least, but maybe wait until the
   prefetch section
--TAB hardware
- *Use images
+-TAB hardware (description)
+ *TAB itself to hold 4 lines from the L1D
+ *Metadata structure for TAB and line metadata
+ *4 entry register array stores the base register associated with each TAB
+ *Valid window structure to indicate TAB validity per function call
+-TAB hardware (image)
+ *Use the hardware overview image 3.1
+-TAB hardware (ID stage description)
+ *Include the left side of hardware graphic
+ *Memory references compare the base register number against each TAB
+ associated register number in parallel
+ *If any match AND the matching TAB is valid (AND bits from comparison and valid
+ windows), direct that reference to the associated TAB
+ *If none match, go to L1D
+-TAB metadata (description and image)
+ *show the metadata and buffer section of the image
+ *Separate metadata for TAB entry and TAB line
+  +Not necessarily a one to one relationship between TAB entries and TAB lines
+ *Line and line metadata accessed through index field from TAB entry
+ *Level of indirection between the TAB entry and TAB lines allows multiple
+ TABs to share the same line
+-TAB metadata (show actual tab metadata structure)
+ *TAB metadata stores information about prefetching, the access type, and which line in
+  the buffer it is using
+  +access type helps save energy by stopping certain unnecessary line transfers
+  +prefetch type and prefetch PC give information about how and when to
+  prefetch
+  +index and extra line 
+-Line metadata (show actual line metadata structure)
+ *Line metadata stores information which allows quick L1D access for writebacks
+  and interferences
+  +line number and way indicate the exact L1D location
+  of the line
+  +Physical page number removes the need to check the DTLB
+  +includes a write mask so only dirty bytes are written back to l1d
 -TAB Operations
 -Compiler garbage
 -Extra functionality
