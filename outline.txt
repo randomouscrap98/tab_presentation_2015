@@ -188,12 +188,42 @@ X the changes!
  *Include equation here?
 -Allocation example
  *Use image example 5.4
--Extra functionality
- *Avoiding unnecessary data transfers
-
+-Avoiding unnecessary data transfers
+ *Compiler controlled TAB means access patterns can be exploited to further
+ reduce energy
+ *Write mask can create a read-only TAB with no L1D writes
+ *TAB's "Type" metadata field can indicate write first and write contiguous
+  +Write first: TAB always writes bytes before reading. Don't pull line
+  from L1D
+  +Write contiguous: All bytes in TAB line are written before reading. Don't
+  pull line from L1D or L2D
+ *Use figure 6.1
+-Compare with original
+ *Original
+  +Required bits from loads and stores to indicate TAB and 2 opcodes
+   #Not backwards compatible 
+   #Loads and stores lose part of their immediate field
+  +Did not link base register to TAB
+   #TABs could have multiple registers
+   #TABs could stay active across function calls
+ *New
+  +Does not require any ISA changes beyond 1 extra opcode
+   #Backwards compatible with existing code
+  +Requires extra hardware due to base register association 
+   #Captures less references due to more strict requirements
+   #Can't keep TABs valid on function calls; must have separate validity per
+   call
+-Benchmarking
+ *Use 20 benchmarks and large datasets from MiBench suite
+ *Compile benchmarks with VPO compiler
+ *Simulate in order five stage pipeline with SimpleScalar
+ *32 byte L1D lines, 4 TAB lines, 16kB L1D
+ *Energy estimates from accurate 65nm CMOS library models using Synopsys Design
+ Compiler
+-Benchmarking (image)
+ *Table 7.2 and 7.3?
 -How well does it work? 
  *Results
--Compare with original
 -Conclusion
  *TAB does stuff blah blah blah
 
