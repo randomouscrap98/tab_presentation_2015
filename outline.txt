@@ -170,6 +170,24 @@ X the changes!
  *TAB references must all be in the same loop
  *Each TAB reference must have the same constant stride
  *Maximum distance between any two TAB references is no more than the line size
+-Allocation heuristics
+ *We can't allocate all potential TABs: in our case, we can have four at one
+ time
+ *If we have more TABs than we know what to do with, we use a heuristic to
+ select the ones which may save the most energy.
+ *Rate each TAB reference based on estimated saved L1D accesses, then find the 
+ TABs with the most overall.
+-Allocation heuristics continued
+ *Each reference starts with 1 saved L1D access
+ *References in conditionally executed code are halved
+ *References in inner loops are increased based on depth
+ *Add all TAB reference values to get overall saved accesses
+ *Subtract required L1D accesses per loop (both loads and stores)
+  -Prefetches require a load and store; frequency based on stride
+ *Divide overall saved accesses by 2 if using an extra line
+ *Include equation here?
+-Allocation example
+ *Use image example 5.4
 -Extra functionality
  *Avoiding unnecessary data transfers
 
