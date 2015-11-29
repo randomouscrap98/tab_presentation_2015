@@ -29,7 +29,7 @@
    #gtab prefetches the line needed by the first TAB reference
    #Further prefetches are performed automatically when needed and keep the
     line data valid for the TAB references.
-  +rtab removes the register link and deallocates the TAB
+  +rtabs removes the register link and deallocates the TAB
  *Both instructions use the same opcode; distinguished by a bit
   +Maybe image here?
 X*Once you have enough information, talk about the changes to TAB
@@ -78,7 +78,7 @@ X the changes!
   +Physical page number removes the need to check the DTLB
   +includes a write mask so only dirty bytes are written back to l1d
 -ISA modifications
- *Only requires one extra opcode: gtab and rtab instructions are differentiated
+ *Only requires one extra opcode: gtab and rtabs instructions are differentiated
   by a separate one bit field
  *Many fields in gtab get stored in metadata
   +base register stored in register array
@@ -86,7 +86,7 @@ X the changes!
   +L/S is the prefetch type
   +Prefetch offset is multiplied by the instruction byte width and added to the
   current PC to produce the prefetch PC metadata field
- *rtab release field is a bitfield indicating which TAB entries to deallocate
+ *rtabs release field is a bitfield indicating which TAB entries to deallocate
 -Required L1D changes
  *Each line in L1D extended with 2 bits: a T and I bit
  *T bit indicates if line resides in a TAB. When L1D evictions occur, this is
@@ -98,11 +98,84 @@ X the changes!
   +Many lines that reside in the TAB are guaranteed not to cause interferences, 
    so it is a waste to go to the TAB
 -TAB Operations
--Compiler garbage
+ *gtab instruction allocates a TAB
+  +Deallocates existing TAB entry (if valid)
+  +updates register array to associate base register with TAB
+  +prefetches first line to be accessed by TAB references
+  +marks entry as valid
+ *rtabs instruction deallocates one or more TABs
+  +bitfield in rtabs states TABs to deallocate
+  +Only flush dirty bytes when deallocating
+  +remove register association
+-Prefetching
+ *Include prefetch image here
+ *TAB assumes it has the proper line at all times
+ *Can calculate the next TAB reference's address using stride information
+ *If next reference crosses line boundary, prefetch the next line now
+ *Since address is always known and physical page number is stored, tag checks
+ and DTLB lookups are usually unnecessary
+  +DTLB will be accessed on gtab or when a page boundary is crossed
+-More prefetching
+ *Not all TAB references should check for prefetch
+  +Can't prefetch in conditionally executed code
+  +Shouldn't prefetch if future references use old line
+  +Some prefetch checks are wasteful
+ *TAB references must fit into a prefetch scheme:
+  +All loads, all stores, all loads and stores, or a single instruction can
+  cause a prefetch
+  +If single instruction, check PC of reference 
+ *Only check for prefetch when indicated by the scheme
+ *If TAB references don't fit the scheme, compiler can't allocate TAB
+-Extra line
+ *Sometimes a TAB may require two lines instead of just one
+  +TAB references may be accessed out of order, making prefetching impossible
+  +Extra line solves this by allowing us to prefetch back and forth between two
+  lines, keeping the old line for references that need it
+ *TAB references use the next high order bit after the line number to determine
+ which TAB line to access
+ *Each line keeps track of prefetching and line metadata individually
+ *When an extra line is used, one less TAB entry can be allocated
+-Supporting function calls
+ *Can't keep TAB across function calls
+  +base registers used in caller loop may be reused for different references in
+  callee
+ *Shouldn't just deallocate all TABs on a function call (inefficient)
+ *Use a window system to keep track of validity per call
+  +Each function call has its own set of TAB validity bits
+  +All TABs are marked invalid in new windows, other window validity is kept
+  intact
+  +A TAB can only be valid in one window/function call at a time
+  +Allocating a TAB in a new window deallocates the TAB for previous windows
+-Supporting function calls 2
+ *Include some kind of image? The window example probably
+ *Since old TABs appears invalid on calls, references are directed to L1D
+ appropriately
+ *All other TAB data is kept intact on function calls, only validity is changed
+ *If function call does not use a TAB, it can stay valid for the caller
+ *If a caller TAB is used in the callee, the caller can no longer use it when
+ the callee returns
+-Compiler analysis
+ *No interprocedural analysis or code transformations
+ *Compiler must know TAB buffer line size and line count
+ *Compiler detects memory references with constant strides or with loop
+ invariant addresses
+ *If references fit TAB constraints, compiler can generate a gtab in the loop
+ preheader and an rtabs in the postheader
+-TAB allocation constraints
+ *TAB references must all have the same base register
+ *No other references may use the TAB's base register while it is active
+ *TAB references must fit in a line and average more than 1 reference per line
+ *TAB references must fit one of the prefetch schemes and cannot require a
+ prefetch in conditionally executed code
+ *TAB references must all be in the same loop
+ *Each TAB reference must have the same constant stride
+ *Maximum distance between any two TAB references is no more than the line size
 -Extra functionality
  *Avoiding unnecessary data transfers
+
 -How well does it work? 
  *Results
+-Compare with original
 -Conclusion
  *TAB does stuff blah blah blah
 
