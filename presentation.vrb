@@ -1,0 +1,7 @@
+\frametitle{Allocation Heuristics Example}
+\begin{block}{Example Code}
+      \includegraphics[width=0.65\textwidth]{figures/estimationexample_horizontal.pdf}
+   \end{block}
+   \begin{block}{Calculated Avoided L1D Accesses}
+      \includegraphics[width=0.65\textwidth]{figures/estimationtable.pdf}
+   \end{block}

@@ -1,4 +1,7 @@
 \documentclass{beamer}
+
+\usepackage{array}
+
 \usetheme{Darmstadt}
 \useinnertheme{rectangles}
 \definecolor{garnet}{RGB}{114,47,55}
@@ -24,6 +27,8 @@
 {Computer Science Department\\ Florida State University}
 \date{Fall 2015}
 \subject{Computer Science}
+
+%This is just to make the table easier
 
 \begin{document} 
 \frame{\titlepage} 
@@ -349,6 +354,171 @@
       \item Each TAB reference must have the same constant stride
       \item Maximum distance between any two TAB references is no more 
          than the line size
+   \end{itemize}
+\end{frame}
+\begin{frame}{Allocation Heuristics}
+   \begin{itemize}
+      \item Can't allocate all potential TABs: in our case, we can have 
+         four at one time
+      \item Use a heuristic to select best energy saving TABs; ie the ones which
+         may capture the most L1D references
+      \item Rate each TAB reference based on estimated saved L1D accesses,
+         then find the TABs with the most saved overall.
+   \end{itemize}
+\end{frame}
+\begin{frame}{Allocation Heuristics Continued}
+   \begin{itemize}
+      \item Each reference starts with one saved L1D access
+      \item References in conditionally executed code are halved
+      \item References in inner loops are increased based on depth
+      \item Add all TAB reference scores to get "estimated references" 
+         saved for TAB per loop
+      \item Subtract required L1D accesses per loop (both loads and stores)
+         \begin{itemize}
+            \item Prefetches require a load and store; frequency based on stride
+         \end{itemize}
+      \item Divide overall saved accesses by two if using an extra line
+   \end{itemize}
+   \begin{block}{TAB Score Equation}
+      \begin{equation}
+         (estim\_refs - (L1D\_loads + L1D\_writes)) / \#TAB\_lines
+      \end{equation}
+   \end{block}
+\end{frame}
+\begin{frame}{Allocation Heuristics Example}
+   \begin{block}{Example Code}
+      \includegraphics[width=0.65\textwidth]{figures/estimationexample_horizontal.pdf}
+   \end{block}
+   \begin{block}{Calculated Avoided L1D Accesses}
+      \begin{center}
+      \includegraphics[width=0.80\textwidth]{figures/estimationtable.pdf}
+      \end{center}
+   \end{block}
+\end{frame}
+\begin{frame}{Avoiding Unnecessary Data Transfers}
+   \begin{columns}
+      \column{0.6\textwidth}
+      \begin{block}{Read and Write Only TABs}
+         \begin{itemize}
+            \item Compiler controlled TAB means access patterns can be exploited to 
+               further reduce energy
+            \item Write maks can create a read-only TAB with no L1D writes
+            \item TAB's "type" metadata field can indicate write first and write contiguous
+               \begin{itemize}
+                  \item \textbf{Write first:} TAB always writes bytes before reading.
+                     Don't pull line from L1D
+                  \item \textbf{Write contiguous:} All bytes in TAB line are written 
+                     first. Don't pull line from L1D or L2D
+               \end{itemize}
+         \end{itemize}
+      \end{block}
+      \column{0.4\textwidth}
+      \includegraphics[width=0.33\textwidth]{figures/memorytransfer_readonly.pdf}
+      \includegraphics[width=0.33\textwidth]{figures/memorytransfer_writefirst.pdf}
+      \includegraphics[width=0.33\textwidth]{figures/memorytransfer_writecontiguous.pdf}
+   \end{columns}
+\end{frame}
+\section{Update Vs Original}
+\subsection{Compare Update with Original}
+\begin{frame}{Original Implementation}
+   %\begin{block}{Original Implementation}
+      \begin{itemize}
+         \item Required bits from loads and stores to indicate TAB and used two opcodes
+            \begin{itemize}
+               \item Not backwards compatible
+               \item Loads and stores lose part of their immediate field
+            \end{itemize}
+         \item Did not link base register to TAB
+            \begin{itemize}
+               \item TABs could have multiple registers
+               \item TABs could stay active across function calls
+            \end{itemize}
+      \end{itemize}
+   %\end{block}
+   \end{frame}
+      \begin{frame}{New Implementation}
+   %\begin{block}{New Implementation}
+      \begin{itemize}
+         \item Does not require any ISA changes beyond one extra opcode
+            \begin{itemize}
+               \item Backwards compatible with existing code
+               \item Easier to adopt
+            \end{itemize}
+         \item More strict and requires extra hardware due to base register association
+            \begin{itemize}
+               \item Captures less references due to strict requirements
+               \item Higher chance to lose TABs on function calls
+            \end{itemize}
+      \end{itemize}
+   %\end{block}
+\end{frame}
+\section{Results}
+\subsection{Benchmarking}
+\begin{frame}{How the TAB was tested}
+   \begin{itemize}
+      \item Use 20 benchmarks and large datasets from MiBench suite
+      \item Compile benchmarks with VPO compiler
+      \item Simulate in order five stage pipeline with SimpleScalar
+      \item 32 byte L1D lines, 4 TAB lines, 16KB L1D
+      \item Energy estimations from accurate 65nm CMOS library models
+         using Synopsys Design Compiler
+   \end{itemize}
+\end{frame}
+\begin{frame}{Testing Environment Details}
+   \begin{block}{Energy Values}
+      \begin{center}
+         \vspace{-0.3cm}
+         \includegraphics[scale=0.7]{figures/benchmarkenergy.pdf}
+         \vspace{-0.3cm}
+      \end{center}
+   \end{block}
+   \begin{block}{Benchmark Suite}
+      \begin{center}
+         \vspace{-0.3cm}
+         \includegraphics[scale=0.7]{figures/benchmarksuite.pdf}
+         \vspace{-0.3cm}
+      \end{center}
+   \end{block}
+\end{frame}
+\subsection{Benchmark Results}
+\begin{frame}{TAB Performance}
+   With TAB enabled:
+   \begin{itemize}
+      \item \textbf{33.4\%} of total L1D references captured in TAB
+      \item \textbf{30.9\%} fewer L1D accesses
+      \item \textbf{1.7\%} less execution cycles
+      \item \textbf{21.8\%} less energy used in L1D and DTLB
+   \end{itemize}
+\end{frame}
+\begin{frame}{TAB Performance Graph: L1D Access Breakdown}
+   \includegraphics[width=\textwidth]{figures/dl1_access.pdf}
+\end{frame}
+\begin{frame}{TAB Performance Graphs: Energy Breakdown}
+   \includegraphics[width=\textwidth]{figures/energy_e_stage.pdf}
+\end{frame}
+\section{Conclusion}
+\subsection{Final comparison}
+\begin{frame}{TAB Update is give and take}
+   \begin{itemize}
+      \item Update requires far fewer ISA changes and is backwards compatible, but
+         has reduced energy benefits
+         \begin{itemize}
+            \item Drop in TAB hits from 41.4\% to 33.4\%
+            \item Increased execution time from 97.5\% to 98.3\%
+            \item Decreased energy savings from 30.4\% to 21.8\%
+         \end{itemize}
+      \item Lower energy benefits almost entirely due to decreased TAB utilization
+         caused by more strict TAB allocation requirements
+   \end{itemize}
+\end{frame}
+\subsection{}
+\begin{frame}{Conclusion}
+   \begin{itemize}
+      \item TAB reduces energy by capturing loop memory references in a small buffer
+         which does not require tag checks and which greatly reduces DTLB accesses
+      \item TAB updated to not require bits from loads and stores, making 
+         backwards compatible and easier to adopt
+      \item Must sacrifice some energy savings for a less intrusive system
    \end{itemize}
 \end{frame}
 \end{document}
