@@ -423,7 +423,7 @@
 \begin{frame}{Original Implementation}
    %\begin{block}{Original Implementation}
       \begin{itemize}
-         \item Required bits from loads and stores to indicate TAB and used two opcodes
+         \item Required bits from loads and stores to indicate TAB; used two opcodes
             \begin{itemize}
                \item Not backwards compatible
                \item Loads and stores lose part of their immediate field
@@ -484,7 +484,7 @@
 \begin{frame}{TAB Performance}
    With TAB enabled:
    \begin{itemize}
-      \item \textbf{33.4\%} of total L1D references captured in TAB
+      \item \textbf{33.4\%} of all L1D references captured in TAB
       \item \textbf{30.9\%} fewer L1D accesses
       \item \textbf{1.7\%} less execution cycles
       \item \textbf{21.8\%} less energy used in L1D and DTLB
@@ -517,7 +517,7 @@
       \item TAB reduces energy by capturing loop memory references in a small buffer
          which does not require tag checks and which greatly reduces DTLB accesses
       \item TAB updated to not require bits from loads and stores, making 
-         backwards compatible and easier to adopt
+         it backwards compatible and easier to adopt
       \item Must sacrifice some energy savings for a less intrusive system
    \end{itemize}
 \end{frame}
