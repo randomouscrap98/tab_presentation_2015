@@ -31,7 +31,8 @@
     line data valid for the TAB references.
   +rtabs removes the register link and deallocates the TAB
  *Both instructions use the same opcode; distinguished by a bit
-  +Maybe image here?
+  +Maybe image here? SAVE IMAGE FOR ISA CHANGES SECTION BECAUSE CONFUSING
+  FIELDS!
 X*Once you have enough information, talk about the changes to TAB
 X*We may need to talk about the "updated" part much later so people understand
 X the changes!
@@ -123,7 +124,7 @@ X the changes!
  *TAB references must fit into a prefetch scheme:
   +All loads, all stores, all loads and stores, or a single instruction can
   cause a prefetch
-  +If single instruction, check PC of reference 
+  +If single instruction, check current reference PC against stored PC
  *Only check for prefetch when indicated by the scheme
  *If TAB references don't fit the scheme, compiler can't allocate TAB
 -Extra line

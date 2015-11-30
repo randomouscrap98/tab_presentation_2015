@@ -30,14 +30,16 @@
 \section{Introduction}
 \subsection{TAB Basics}
 \begin{frame}{What is the Tagless Access Buffer?}
-   \begin{itemize}
-      \item A small buffer placed at the top of the memory hierarchy
-      \item Holds a few lines from the L1D (inclusive)
-      \item Data explicitly directed from the L1D to the TAB by compiler 
-         generated instructions
-      \item Compiler looks in loops for references with constant strides
-         or invariant addresses to direct to the TAB
-   \end{itemize}
+   \begin{block}{The TAB is:}
+      \begin{itemize}
+         \item A small buffer placed at the top of the memory hierarchy
+         \item Holds a few lines from the L1D (inclusive)
+         \item Data explicitly directed from the L1D to the TAB by compiler 
+            generated instructions
+         \item Compiler looks in loops for references with constant strides
+            or invariant addresses to direct to the TAB
+      \end{itemize}
+   \end{block}
    \begin{center}
       \includegraphics[width=0.8\textwidth]{figures/dmemhier.pdf}
    \end{center}
@@ -126,17 +128,227 @@
       \includegraphics[width=\textwidth]{figures/tabhardware_ID.pdf}
    \end{columns}
 \end{frame}
-\begin{frame}{How it works with explanation 2}
+\begin{frame}{TAB EX Stage}
+   \begin{block}{TAB Metadata and Buffer}
+      \begin{itemize}
+         \item Separate metadata for TAB entry and TAB line
+            \begin{itemize}
+               \item Not necessarily a one-to-one relationship
+                  between TAB entries and TAB lines
+            \end{itemize}
+         \item Line and line metadata are accessed through the index field 
+            in the TAB entry
+         \item Level of indirection between TAB entry and TAB lines allows
+            multiple TABs to share the same line
+      \end{itemize}
+   \end{block}
+   \includegraphics[width=\textwidth]{figures/tabhardware_EX.pdf}
+\end{frame}
+\begin{frame}{TAB Metadata}
    \begin{columns} %[c] for centered, [T] for top
-      \column{.5\textwidth}
-         This is how it works: yeah
-      \begin{block}{This is a block}
-         A detailed explanation with a fancy header
+      \column{.6\textwidth}
+      \begin{block}{What is stored?}
+         TAB metadata stores information about prefetching, the access type,
+         and the TAB line it is using
+         \begin{itemize}
+            \item Access type helps save energy by stopping certain unnecessary 
+               line transfers
+            \item Stride, prefetch type and prefetch PC give information about how and
+               when to prefetch
+            \item Index and extra line indicate the TAB line(s) being used
+         \end{itemize}
       \end{block}
-      \column{.5\textwidth}
-      \begin{block}{An image in a block}
-         \includegraphics[width=\textwidth]{figures/tabhardware.pdf}
-      \end{block}
+      \column{.4\textwidth}
+      \includegraphics[width=\textwidth]{figures/tabmeta.pdf}
    \end{columns}
+\end{frame}
+\begin{frame}{Line Metadata}
+   \begin{block}{What is stored?}
+      Line metadata stores information which allows quick L1D access for
+      writebacks and interferences
+      \begin{itemize}
+         \item Line number and way give exact L1D location of line
+         \item Physical page number removes need to check the DTLB per access
+         \item Write mask so only dirty bytes are written back to L1D
+      \end{itemize}
+   \end{block}
+   \begin{center}
+      \includegraphics[width=0.55\textwidth]{figures/linemeta.pdf}
+   \end{center}
+\end{frame}
+\subsection{Modifications Required for TAB}
+\begin{frame}{ISA Modifications}
+   \begin{block}{Extra instructions}
+      \begin{itemize}
+         \item Only requires one extra opcode: gtab and rtabs instructions
+            are differentiated by a separate one-bit field
+         \item Many fields in gtab are stored in metadata
+            \begin{itemize}
+               \item Base register stored in register array
+               \item Stride is left shifted by value in shift size to give actual stride
+               \item L/S is the prefetch type
+               \item Prefetch offset multiplied by the instruction byte width is
+                  added to the current PC to produce prefetch PC metadata field
+            \end{itemize}
+         \item rtabs release bitfield indicates TAB entries to deallocate
+      \end{itemize}
+   \end{block}
+   \begin{center}
+      \includegraphics[width=0.85\textwidth]{figures/gtabformat.pdf}\\
+      \includegraphics[width=0.85\textwidth]{figures/rtabformat.pdf}
+   \end{center}
+\end{frame}
+\begin{frame}{Required L1D Changes}
+   \begin{itemize}
+      \item Each line in L1D is extended with two bits: the T and I bits
+      \item T bit indicates if line resides in a TAB. L1D evictions use this bit
+         to properly deallocate TAB line
+      \item I bit indicates if references to this line should go to the TAB for
+         the most recent data; this is called an "interference"
+      \item Many lines that reside in the TAB are guaranteed not to cause interferences,
+         hence the need for the separate I bit.
+   \end{itemize}
+\end{frame}
+\section{TAB Operations}
+\subsection{Basic TAB Functionality}
+\begin{frame}{Allocation and Deallocation}
+   \begin{itemize}
+      \item gtab instruction allocates a TAB
+         \begin{itemize}
+            \item Deallocates existing TAB entry if still valid
+            \item Updates register array to associate base register with TAB
+            \item Prefetches first line to be accessed by TAB references
+            \item Marks entry as valid
+         \end{itemize}
+      \item rtabs instruction deallocates one or more TABs
+         \begin{itemize}
+            \item Bitfield in rtabs states TABs to deallocate
+            \item Only flush dirty bytes when deallocating
+            \item Remove register association
+         \end{itemize}
+   \end{itemize}
+\end{frame}
+\subsection{Prefetch System}
+\begin{frame}{Prefetching}
+   \begin{block}{How prefetching works}
+      \begin{itemize}
+         \item TAB assumes it has the proper line at all times
+         \item Can calculate the next TAB reference's address using stride information
+         \item If next reference crosses line boundary, prefetch next line now
+         \item Line is guaranteed (if valid), so no tag checks
+         \item DTLB only accessed when prefetching first line or crossing
+            a page boundary
+      \end{itemize}
+   \end{block}
+   \begin{center}
+      \includegraphics[width=0.45\textwidth]{figures/prefetch.pdf}
+   \end{center}
+\end{frame}
+\begin{frame}{Prefetch Schemes}
+   \begin{itemize}
+      \item Not all TAB references should check for a prefetch
+         \begin{itemize}
+            \item Can't prefetch in conditionally executed code
+            \item Shouldn't prefetch if future references use old line
+            \item Some prefetch checks are wasteful
+         \end{itemize}
+      \item TAB references must fit into a prefetch scheme
+         \begin{itemize}
+            \item Can't indicate each and every prefetch individually through 
+               just a gtab instruction
+            \item Use a scheme instead to mark many instructions
+            \item Either all loads, all stores, all loads and stores, or a single
+               instruction causes a prefetch
+            \item If single instruction prefetch, check current reference PC against
+               stored PC
+         \end{itemize}
+      \item Only check for prefetch when indicated by the scheme
+      \item If TAB references don't fit a scheme, can't allocate TAB
+   \end{itemize}
+\end{frame}
+\subsection{Capturing More References}
+\begin{frame}{Extra Line}
+   \begin{itemize}
+      \item Sometimes a TAB may require two lines instead of one
+         \begin{itemize}
+            \item TAB references may be accessed out of order, making 
+               prefetching impossible
+            \item Extra line solves this by letting us prefetch back and forth
+               between two lines, keeping the line for references that need it
+         \end{itemize}
+      \item TAB references use the next high order bit after the line number
+         to determine which TAB line to access
+      \item Each line keeps track of prefetching and line metadata individually
+      \item When an extra line is used, one less TAB entry can be allocated
+   \end{itemize}
+\end{frame}
+\subsection{TAB and Function Calls}
+\begin{frame}{Supporting Function Calls}
+   \begin{itemize}
+      \item Can't keep TAB across function calls
+         \begin{itemize}
+            \item Base registers used in caller loop may be reused for 
+               different references in callee
+         \end{itemize}
+      \item Shouldn't just deallocate all TABs on a function call (inefficient)
+      \item Use a window system to keep track of validity per call
+         \begin{itemize}
+            \item Each function call has its own set of TAB validity bits
+            \item All TABs are marked invalid in new windows; other window
+               validity kept intact
+            \item A TAB is only valid in one window
+            \item Allocating a TAB deallocates the TAB from previous windows
+         \end{itemize}
+   \end{itemize}
+\end{frame}
+\begin{frame}{Supporting Function Calls Example}
+   \begin{block}{Pseudocode for valid windows}
+      \begin{center}
+         \includegraphics[width=0.65\textwidth]{figures/validexample1-1.pdf}
+      \end{center}
+   \end{block}
+   \begin{block}{Valid windows at various points}
+      \begin{center}
+         \includegraphics[width=0.85\textwidth]{figures/validexample1-2.pdf}
+      \end{center}
+   \end{block}
+\end{frame}
+\begin{frame}{Supporting Function Calls Continued}
+   \begin{itemize}
+      \item Since old TABs appear invalid on calls, references are directed to
+         L1D appropriately
+      \item All other TAB data is kept intact on function calls, 
+         only validity is changed
+      \item If function call does not use a TAB, it can stay valid for the caller
+      \item If a caller TAB is reallocated in the callee, the caller can no longer
+         use it when the callee returns
+   \end{itemize}
+\end{frame}
+\section{Compilation}
+\subsection{Compiler Analysis}
+\begin{frame}{Compiler Requirements}
+   \begin{itemize}
+      \item No additional interprocedural analysis or code transformations
+      \item Compiler must know TAB buffer line width and line count
+      \item Compiler detects memory references with constant strides or with
+         loop invariant addresses
+      \item If references fit TAB constraints, compiler can generate a gtab in
+         the loop preheader and an rtabs in the postheader
+   \end{itemize}
+\end{frame}
+\begin{frame}{TAB Allocation Constraints}
+   \begin{itemize}
+      \item TAB references must all have the same base register
+      \item No other references may use the TAB's base register
+         while it is active
+      \item TAB references must fit in a line and average more than 1 
+         reference per line
+      \item TAB references must fit one of the prefetch schemes and cannot require
+         a prefetch in conditionally executed code
+      \item TAB references must all be in the same loop
+      \item Each TAB reference must have the same constant stride
+      \item Maximum distance between any two TAB references is no more 
+         than the line size
+   \end{itemize}
 \end{frame}
 \end{document}
