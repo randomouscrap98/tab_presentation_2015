@@ -229,6 +229,19 @@ X the changes!
  *1.7% less execution cycles
  *21.8% less energy used in L1D and DTLB
 -Figure 8.2, 8.4
+-TAB Update is give and take
+ *Update requires far fewer ISA changes and is backwards compatible, but we
+ lose some energy benefits
+  +Drop in TAB hits from 41.4% to 33.4%
+  +Increased execution time from 97.5% to 98.3%
+  +Decreased energy savings from 30.4% to 21.8%
+ *Energy benefits lost mostly due to decreased TAB utilization caused by more
+ strict TAB allocation requirements
 -Conclusion
- *TAB does stuff blah blah blah
-
+ *TAB reduces energy by capturing loop memory references in a small buffer
+ which does not require tag checks and which reduces DTLB accesses.
+ *TAB updated to not require bits from loads and stores, making it easier to
+ adopt
+  +Updated TAB is backwards compatible, unlike before
+  +ISA changes reduced to 1 added opcode.
+ *Must sacrifice some energy savings for less intrusive system
