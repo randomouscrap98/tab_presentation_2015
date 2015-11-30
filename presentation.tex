@@ -27,55 +27,103 @@
 
 \begin{document} 
 \frame{\titlepage} 
-\section{Initial pokings}
-\subsection{How to do things?}
-\begin{frame}{This is the first slide}
-   Some content and whatever.
-   How do you do bullets?
-   How do you do images?
-\end{frame}
-\subsection{Some revelations}
-\begin{frame}{This is the second slide}
-   \framesubtitle{Doing some other cool stuff}
-   You can only have one subtitle (so IDK when to use it)
-   boring content
-   extra boring content
-\end{frame}
-\section{First tests}
-\subsection{Lists}
-\begin{frame}{Some lists}
+\section{Introduction}
+\subsection{TAB Basics}
+\begin{frame}{What is the Tagless Access Buffer?}
    \begin{itemize}
-      \item This is a bullet list (begin\{itemize\})
-      \item It works just like any other bullet list in latex
-      \item That's nice
+      \item A small buffer placed at the top of the memory hierarchy
+      \item Holds a few lines from the L1D (inclusive)
+      \item Data explicitly directed from the L1D to the TAB by compiler 
+         generated instructions
+      \item Compiler looks in loops for references with constant strides
+         or invariant addresses to direct to the TAB
    \end{itemize}
-   \begin{enumerate}
-      \item This is a numbered list (begin\{enumerate\})
-         \begin{enumerate}
-            \item A subitem
-            \item Another subitem
-         \end{enumerate}
-      \item This also works like other latex enumerations
-   \end{enumerate}
-   \begin{description}
-      \item[First] The first item in a begin\{description\}
-      \item[Second] The second item
-      \item[Third] The third etc \ldots
-   \end{description}
+   \begin{center}
+      \includegraphics[width=0.8\textwidth]{figures/dmemhier.pdf}
+   \end{center}
 \end{frame}
-\subsection{Images}
-\begin{frame}{How it works}
+\begin{frame}{What problem does it solve?}
+   \begin{itemize}
+      \item Energy efficiency is a major design constraint in processors
+      \item Cache accounts for up to 25\% of a processor's total power draw
+      \item TAB reduces overall cache energy usage because it:
+         \begin{itemize}
+            \item Is smaller than the L1D
+            \item Requires far fewer DTLB accesses
+            \item Requires no tag check
+            \item Is compiler controlled, meaning more analysis on the most
+               efficient usage of the structure
+         \end{itemize}
+   \end{itemize}
+\end{frame}
+\begin{frame}{Why constant strides or invariant addresses?}
+   \begin{itemize}
+      \item Can calculate the following reference's address if the loop reference
+         has a known constant stride throughout the loop or if the address 
+         doesn't change
+      \item Knowing this, we can prefetch the next line before it is needed so
+         it is available before the next access
+      \item No need to check tags; prefetching guarantees the TAB to have the line 
+         we need
+   \end{itemize}
+\end{frame}
+\subsection{Operation Introduction}
+\begin{frame}{TAB Instructions}
+   Two instructions control the TAB. Both instructions use the same opcode,
+   distinguished by a bit
+   \begin{itemize}
+      \item \textbf{gtab} links a register to a TAB entry
+      \item once active, references with that base register will be directed to the TAB
+      \item gtab prefetches the line needed by the first TAB reference
+      \item Further prefetches are performed automatically when needed and keep
+         the line data valid for future TAB references
+      \item \textbf{rtabs} removes the register link and deallocates the TAB
+   \end{itemize}
+\end{frame}
+\begin{frame}{Example TAB Instruction Generation}
+   \begin{center}
+      \begin{block}{Original Loop (simple summation)}
+         \includegraphics[scale=0.20]{figures/compiler_example_1-1.pdf}
+      \end{block}
+      \begin{block}{Basic Generated Instructions}
+         \includegraphics[scale=0.20]{figures/compiler_example_1-2.pdf}
+      \end{block}
+      \begin{block}{Compiler Inserted TAB Instructions}
+         \includegraphics[scale=0.20]{figures/compiler_example_1-3.pdf}
+      \end{block}
+   \end{center}
+\end{frame}
+\section{Hardware}
+\subsection{TAB Structures}
+\begin{frame}{Required Structures}
+   %TAB requires a number of structures for operation:
+   \begin{itemize}
+      \item The TAB itself to hold a number of lines from the L1D 
+         (four in our implementation)
+      \item Metadata structure for TAB entry and TAB line metadata
+      \item Register array to store the base register associated with
+         each TAB (four register numbers)
+      \item Valid window structure to indicate TAB validity per function call
+         (eight windows, four valid bits per window)
+   \end{itemize}
+\end{frame}
+\begin{frame}{Structure Overview}
    \includegraphics[width=\textwidth]{figures/tabhardware.pdf}
 \end{frame}
-\begin{frame}{How it works with explanation}
+\begin{frame}{TAB ID Stage}
    \begin{columns} %[c] for centered, [T] for top
-      \column{.5\textwidth}
-      This is how it works: yeah
-      \begin{block}{This is a block}
-      A detailed explanation with a fancy header
+      \column{.57\textwidth}
+      \begin{block}{TAB Reference Detection}
+         \begin{itemize}
+            \item Compare memory reference's base register number against
+               each TAB associated register number in parallel
+            \item If any match AND the matching TAB is valid (\texttt{AND} bits 
+               from comparison with current valid window), direct reference to TAB
+            \item If none match, go the the L1D
+         \end{itemize}
       \end{block}
-      \column{.5\textwidth}
-      \includegraphics[width=\textwidth]{figures/tabhardware.pdf}
+      \column{.43\textwidth}
+      \includegraphics[width=\textwidth]{figures/tabhardware_ID.pdf}
    \end{columns}
 \end{frame}
 \begin{frame}{How it works with explanation 2}
