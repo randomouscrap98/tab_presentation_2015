@@ -223,7 +223,12 @@ X the changes!
 -Benchmarking (image)
  *Table 7.2 and 7.3?
 -How well does it work? 
- *Results
+ With TAB enabled:
+ *33.4% of total L1D references captured in TAB
+ *L1D accessed 30.9% less
+ *1.7% less execution cycles
+ *21.8% less energy used in L1D and DTLB
+-Figure 8.2, 8.4
 -Conclusion
  *TAB does stuff blah blah blah
 
