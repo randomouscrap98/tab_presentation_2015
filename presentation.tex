@@ -79,33 +79,42 @@
    Two instructions control the TAB. Both instructions use the same opcode,
    distinguished by a bit
    \begin{itemize}
-      \item \textbf{gtab} links a register to a TAB entry
-      \item once active, references with that base register will be directed to the TAB
-      \item gtab prefetches the line needed by the first TAB reference
-      \item Further prefetches are performed automatically when needed and keep
-         the line data valid for future TAB references
-      \item \textbf{rtabs} removes the register link and deallocates the TAB
+      \item \textbf{gtab:} Allocates a TAB entry
+         \begin{itemize}
+            \item Links a register to the TAB entry
+            \item Prefetches the line needed by the first TAB reference
+            \item Once active, references with that base register will be directed to the TAB
+            \item Further prefetches are performed automatically when needed and keep
+               the line data valid for future TAB references
+         \end{itemize}
+      \item \textbf{rtabs:} Deallocates one or more TAB entries
+         \begin{itemize}
+            \item Removes the register link
+         \end{itemize}
    \end{itemize}
 \end{frame}
 \begin{frame}{Example TAB Instruction Generation}
-   \begin{center}
+   \vspace{-0.2cm}
+   \begin{footnotesize}
       \begin{block}{Original Loop (simple summation)}
-         \includegraphics[scale=0.20]{figures/compiler_example_1-1.pdf}
+         \includegraphics[scale=0.25]{figures/compiler_example_1-1.pdf}
       \end{block}
+      \vspace{-0.2cm}
       \begin{block}{Basic Generated Instructions}
-         \includegraphics[scale=0.20]{figures/compiler_example_1-2.pdf}
+         \includegraphics[scale=0.25]{figures/compiler_example_1-2.pdf}
       \end{block}
+      \vspace{-0.2cm}
       \begin{block}{Compiler Inserted TAB Instructions}
-         \includegraphics[scale=0.20]{figures/compiler_example_1-3.pdf}
+         \includegraphics[scale=0.25]{figures/compiler_example_1-3.pdf}
       \end{block}
-   \end{center}
+   \end{footnotesize}
 \end{frame}
 \section{Hardware}
 \subsection{TAB Structures}
 \begin{frame}{Required Structures}
    %TAB requires a number of structures for operation:
    \begin{itemize}
-      \item The TAB itself to hold a number of lines from the L1D 
+      \item The TAB holds a number of lines from the L1D 
          (four in our implementation)
       \item Metadata structure for TAB entry and TAB line metadata
       \item Register array to store the base register associated with
@@ -320,7 +329,7 @@
 \end{frame}
 \begin{frame}{Supporting Function Calls Continued}
    \begin{itemize}
-      \item Since old TABs appear invalid on calls, references are directed to
+      \item Since caller TABs appear invalid on calls, references are directed to
          L1D appropriately
       \item All other TAB data is kept intact on function calls, 
          only validity is changed
@@ -344,7 +353,7 @@
 \begin{frame}{TAB Allocation Constraints}
    \begin{itemize}
       \item TAB references must all have the same base register
-      \item No other references may use the TAB's base register
+      \item No other memory references may use the TAB's base register
          while it is active
       \item TAB references must fit in a line and average more than 1 
          reference per line
@@ -360,10 +369,10 @@
    \begin{itemize}
       \item Can't allocate all potential TABs: in our case, we can have 
          four at one time
-      \item Use a heuristic to select best energy saving TABs; ie the ones which
+      \item Use a heuristic to select best energy saving TABs; i.e. the ones which
          may capture the most L1D references
       \item Rate each TAB reference based on estimated saved L1D accesses,
-         then find the TABs with the most saved overall.
+         then select the TABs with the most saved L1D accesses.
    \end{itemize}
 \end{frame}
 \begin{frame}{Allocation Heuristics Continued}
@@ -386,12 +395,16 @@
    \end{block}
 \end{frame}
 \begin{frame}{Allocation Heuristics Example}
+   \vspace{-0.35cm}
    \begin{block}{Example Code}
-      \includegraphics[width=0.65\textwidth]{figures/estimationexample_horizontal.pdf}
+      \includegraphics[width=0.80\textwidth]{figures/estimationexample_horizontal.pdf}
    \end{block}
+   \vspace{-0.25cm}
    \begin{block}{Calculated Avoided L1D Accesses}
       \begin{center}
-      \includegraphics[width=0.80\textwidth]{figures/estimationtable.pdf}
+         \vspace{-0.35cm}
+         \includegraphics[width=1.0\textwidth]{figures/estimationtable.pdf}
+         \vspace{-0.35cm}
       \end{center}
    \end{block}
 \end{frame}
@@ -423,7 +436,8 @@
 \begin{frame}{Original Implementation}
    %\begin{block}{Original Implementation}
       \begin{itemize}
-         \item Required bits from loads and stores to indicate TAB; used two opcodes
+         \item Required bits from displacement field of loads and stores to 
+            indicate TAB; used two opcodes
             \begin{itemize}
                \item Not backwards compatible
                \item Loads and stores lose part of their immediate field
@@ -486,6 +500,7 @@
    \begin{itemize}
       \item \textbf{33.4\%} of all L1D references captured in TAB
       \item \textbf{30.9\%} fewer L1D accesses
+      \item \textbf{32.4\%} fewer DTLB accesses
       \item \textbf{1.7\%} less execution cycles
       \item \textbf{21.8\%} less energy used in L1D and DTLB
    \end{itemize}

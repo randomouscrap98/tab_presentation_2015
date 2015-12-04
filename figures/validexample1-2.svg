@@ -14,7 +14,7 @@
    viewBox="0 0 565.3866 114.02999"
    id="svg8634"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.91 r"
    sodipodi:docname="validexample1-2.svg">
   <defs
      id="defs8636">
@@ -126,9 +126,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="282.63581"
-     inkscape:cy="31.479054"
+     inkscape:zoom="2.8"
+     inkscape:cx="219.2732"
+     inkscape:cy="63.793822"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -138,9 +138,9 @@
      inkscape:guide-bbox="true"
      inkscape:snap-bbox-midpoints="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1031"
+     inkscape:window-height="876"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="24"
      inkscape:window-maximized="1"
      inkscape:snap-grids="false"
      inkscape:snap-bbox-edge-midpoints="true"
@@ -439,7 +439,7 @@
          y="108.56596">1</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TeX Gyre Heros;-inkscape-font-specification:'TeX Gyre Heros, Normal'"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;line-height:125%;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="114.18629"
        y="47.012203"
        id="text9409"
@@ -447,10 +447,10 @@
          sodipodi:role="line"
          id="tspan9411"
          x="114.18629"
-         y="47.012203">#1</tspan></text>
+         y="47.012203">(A)</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TeX Gyre Heros;-inkscape-font-specification:'TeX Gyre Heros, Normal'"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;line-height:125%;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="301.31628"
        y="47.012226"
        id="text9413"
@@ -458,10 +458,10 @@
          sodipodi:role="line"
          id="tspan9415"
          x="301.31628"
-         y="47.012226">#2</tspan></text>
+         y="47.012226">(B)</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:TeX Gyre Heros;-inkscape-font-specification:'TeX Gyre Heros, Normal'"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;line-height:125%;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="491.40378"
        y="47.012226"
        id="text9417"
@@ -469,7 +469,7 @@
          sodipodi:role="line"
          id="tspan9419"
          x="491.40378"
-         y="47.012226">#3</tspan></text>
+         y="47.012226">(C)</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="M 80,52.362205 80,132.3622"
