@@ -179,10 +179,10 @@
 \begin{frame}{Line Metadata}
    \begin{block}{What is stored?}
       Line metadata stores information which allows quick L1D access for
-      writebacks and interferences
+      writebacks, interferences, and prefetches
       \begin{itemize}
          \item Line number and way give exact L1D location of line
-         \item Physical page number removes need to check the DTLB per access
+         \item Physical page number removes need to check the DTLB when accessing L1D
          \item Write mask so only dirty bytes are written back to L1D
       \end{itemize}
    \end{block}
@@ -286,7 +286,7 @@
       \item Sometimes a TAB may require two lines instead of one
          \begin{itemize}
             \item TAB references may be accessed out of order, making 
-               prefetching impossible
+               prefetching with a single line difficult or impossible
             \item Extra line solves this by letting us prefetch back and forth
                between two lines, keeping the line for references that need it
          \end{itemize}
@@ -415,7 +415,7 @@
          \begin{itemize}
             \item Compiler controlled TAB means access patterns can be exploited to 
                further reduce energy
-            \item Write maks can create a read-only TAB with no L1D writes
+            \item Write mask can create a read-only TAB with no L1D writes
             \item TAB's "type" metadata field can indicate write first and write contiguous
                \begin{itemize}
                   \item \textbf{Write first:} TAB always writes bytes before reading.
